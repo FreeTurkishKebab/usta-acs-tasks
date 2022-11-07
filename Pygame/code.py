@@ -1,7 +1,6 @@
-import pygame
-pygame.display.set_mode((1280, 720)) 
-Cloud = pygame.image.load('Cloud.png').convert_alpha()
-
+import pygame 
+import math
+pygame.init()
 # -- Global Constants 
 x = 0 
 y = 0 
@@ -16,7 +15,7 @@ pygame.init()
 size = (640,480) 
 screen = pygame.display.set_mode(size) 
 # -- Title of new window/screen 
-pygame.display.set_caption("House") 
+dt = pygame.display.set_caption("House") 
 # -- Exit game flag set to false 
 done = False
 sun_x = 40
@@ -32,10 +31,8 @@ while not done:
 #End If
  #Next event
  # -- Game logic goes after this comment
- pygame.draw.circle(screen, YELLOW, (sun_x, sun_y), 40, 0)
- sun_x = sun_x + 5
- x = x  
- y = y 
+
+
  if sun_x >= 640 :
     sun_x = 0
  if sun_y >= 480 :
@@ -45,6 +42,10 @@ while not done:
  # -- Draw here 
  pygame.draw.rect(screen, BLUE, (220,165,200,150))
  pygame.draw.circle(screen, YELLOW, ((sun_x), (sun_y)), 40, 0)
+ angle = 20
+ angle = 0.0174532925 * angle
+ sun_x = (sun_x * math.cos(angle)) + (sun_y * math.sin(angle))
+ sun_y = (sun_x * math.sin(angle)) - (sun_y * math.cos(angle))
  # -- flip display to reveal new position of objects 
  pygame.display.flip()
  # - The clock ticks over 
