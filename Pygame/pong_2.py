@@ -8,6 +8,10 @@ x_direction = 1
 y_direction = 1
 x_edge = False
 y_edge = False
+padd_length = 15
+padd_width = 60
+x_padd = 0
+y_padd = 20
 # -- Colours 
 BLACK = (0,0,0) 
 WHITE = (255,255,255) 
@@ -34,6 +38,7 @@ while not done:
 #End If
  #Next event
  # -- Game logic goes after this comment
+ #This is the part of the code which makes the ball bounce
  if y_val == 460 :
     y_edge = True 
     winsound.Beep(800,20)
@@ -57,11 +62,12 @@ while not done:
     y_val = y_val + y_direction
  else :
     y_val = y_val - y_direction
- 
+#---------------------------------------------------
  # -- Screen background is BLACK 
  screen.fill (BLACK) 
  # -- Draw here 
- pygame.draw.rect(screen, BLUE, (x_val, y_val, ball_width,20)) 
+ pygame.draw.rect(screen, BLUE, (x_val, y_val, 20, ball_width)) 
+ pygame.draw.rect(screen, WHITE, (x_padd, y_padd, padd_length, padd_width))
  # -- flip display to reveal new position of objects 
  pygame.display.flip()
  # - The clock ticks over 
