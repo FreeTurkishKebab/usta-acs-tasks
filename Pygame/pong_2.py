@@ -35,23 +35,46 @@ while not done:
  for event in pygame.event.get(): 
     if event.type == pygame.QUIT: 
        done = True 
+ for event in pygame.event.get(): 
+    if event.type == pygame.QUIT: 
+       done = True
+ #End If
+ if event.type == pygame.KEYDOWN: 
+    if event.key == pygame.K_UP: 
+        y_padd = y_padd - 5    
+ # - write logic that happens on key press here 
+    elif event.key == pygame.K_DOWN : 
+        y_padd = y_padd + 5
+ # - write logic that happens on key press here
+#End If
+ #End If
+#Next event 
 #End If
  #Next event
  # -- Game logic goes after this comment
+
  #This is the part of the code which makes the ball bounce
- if y_val == 460 :
+ if y_val >= 460 :
     y_edge = True 
     winsound.Beep(800,20)
- elif y_val == 0 :
+    x_direction = x_direction + 0.09
+    y_direction = y_direction + 0.09
+ elif y_val <= 0 :
     y_edge = False
     winsound.Beep(800,20)
+    x_direction = x_direction + 0.09
+    y_direction = y_direction + 0.09
 
- if x_val == 620 :
+ if x_val >= 620 :
     x_edge = True 
     winsound.Beep(800,20)
- elif x_val == 0 :
+    x_direction = x_direction + 0.09
+    y_direction = y_direction + 0.09
+ elif x_val <= 0 :
     x_edge = False
     winsound.Beep(800,20)
+    x_direction = x_direction + 0.09
+    y_direction = y_direction + 0.09
 
  if x_edge == False :
     x_val = x_val + x_direction
@@ -63,6 +86,20 @@ while not done:
  else :
     y_val = y_val - y_direction
 #---------------------------------------------------
+#makes the ball bounce differently depending on where on the pallet it hits 
+ if y_val <= y_padd + 50 and y_val >= y_padd - 50 and x_val <= 15 : 
+    if y_edge == True and y_val >= y_padd :
+        y_edge = False 
+        x_edge = False
+    elif y_edge == True and y_val < y_padd :
+        x_edge = False 
+    elif y_edge == False and y_val >= y_padd :
+        x_edge = False 
+    elif y_edge == True and y_val < y_padd :
+        y_edge = False 
+        x_edge = False 
+#------------------------------------------------------------------
+
  # -- Screen background is BLACK 
  screen.fill (BLACK) 
  # -- Draw here 
