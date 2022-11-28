@@ -43,9 +43,8 @@ class Snow(pygame.sprite.Sprite):
    self.rect.y=self.rect.y+self.speed
    if self.rect.y >= 480:
     self.rect.y = 0
-
-
-
+    self.rect.x = random.randrange(0, 600)
+   self.rect.x = random.randrange(-2,3) + self.rect.x
  #End Procedure
 #End Class
 
