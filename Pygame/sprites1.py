@@ -38,7 +38,7 @@ class Snow(pygame.sprite.Sprite):
    self.rect = self.image.get_rect() 
    self.rect.x = random.randrange(0, 600) 
    self.rect.y = random.randrange(0, 400)
-   self.speed = speed
+   self.speed = random.randrange(1,10)
  def update(self):
    self.rect.y=self.rect.y+self.speed
    if self.rect.y >= 480:
