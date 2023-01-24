@@ -71,7 +71,6 @@ class Player(pygame.sprite.Sprite):
             self.rect.x = random.randrange(0, 600)
             self.rect.x = 320
             self.rect.y = 470
-
         player.rect.x = player.rect.x - player.speed
         # end if
         msg = "Lives: " + str(self.lives)
@@ -97,6 +96,7 @@ class bullet(pygame.sprite.Sprite):
         self.rect.y = self.rect.y - 5
         # -- bullet hitting the invader
         pygame.sprite.groupcollide(bulletlist, invader_group, True, True)
+    
 
 bulletlist = pygame.sprite.Group()
 
@@ -152,6 +152,7 @@ while not done:
  for foo in player_hit_group: 
     player.lives = player.lives - 1
     print (player.lives)
+
   # -- Draw here 
  screen.fill (BLACK) 
  all_sprites_group.draw (screen) 
