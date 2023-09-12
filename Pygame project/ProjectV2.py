@@ -21,7 +21,7 @@ dt = pygame.display.set_caption("Space")
 # -- Exit game flag set to false 
 done = False
 # Create a list of the snow blocks 
-invader_group = pygame.sprite.Group() 
+Platform_group = pygame.sprite.Group() 
 # Create a list of all sprites 
 all_sprites_group = pygame.sprite.Group()  
 #create a background
@@ -32,14 +32,13 @@ clock = pygame.time.Clock()
 
 
 ## -- Define the class snow which is a sprite 
-class Invader(pygame.sprite.Sprite): 
+class Platform(pygame.sprite.Sprite): 
  # Define the constructor for snow 
  def __init__(self, color, width, height,speed): 
  # Call the sprite constructor 
    super().__init__() 
  # Create a sprite and fill it with colour 
-   self.image = pygame.Surface([width,height]) 
-   self.image.fill(color) 
+   self.image = pygame.image.load('Platform.png').convert_alpha()
     # Set the position of the sprite 
    self.rect = self.image.get_rect() 
    self.rect.x = random.randrange(0, 600) 
@@ -126,8 +125,8 @@ class bullet(pygame.sprite.Sprite):
     def update(self):
         # Move bullet up 
         self.rect.y = self.rect.y - 5
-        # -- bullet hitting the invader
-        pygame.sprite.groupcollide(bulletlist, invader_group, True, True)
+        # -- bullet hitting the platform
+        pygame.sprite.groupcollide(bulletlist, Platform_group, True, True)
     
 
 bulletlist = pygame.sprite.Group()
@@ -137,13 +136,13 @@ bulletlist = pygame.sprite.Group()
  #End Procedure
 #End Class
 
-# Create the enemies
-number_of_enemies = 10 # we are creating 10 invaders
-for x in range (number_of_enemies): 
-  enemies = Invader(BLUE, 10, 10,1) # invaders are blue with size 10 by 10 px
-  invader_group.add (enemies) # adds the new invader to the group of invaders
-  all_sprites_group.add (enemies) # adds it to the group of all Sprites
-  # - Screen background is BLACK 
+# Create the platforms
+number_of_Platforms = 10 # we are creating 10 Platforms
+for x in range (number_of_Platforms): 
+  Platforms = Platform(BLUE, 10, 10,1) # Platforms are blue with size 10 by 10 px
+  Platform_group.add (Platforms) # adds the new Platform to the group of Platforms
+  all_sprites_group.add (Platforms) # adds it to the group of all Sprites
+ 
 #Next x
 
 
@@ -182,8 +181,8 @@ while not done:
 
  # -- Game logic goes after this comment
  all_sprites_group.update()
- # -- when invader hits the player add 5 to score. 
- player_hit_group = pygame.sprite.spritecollide(player, invader_group, True)
+ # -- when Platform hits the player add 5 to score. 
+ player_hit_group = pygame.sprite.spritecollide(player, Platform_group, True)
  for foo in player_hit_group: 
     player.lives = player.lives - 1
     print (player.lives)
