@@ -24,6 +24,8 @@ done = False
 invader_group = pygame.sprite.Group() 
 # Create a list of all sprites 
 all_sprites_group = pygame.sprite.Group()  
+#create a background
+bg = pygame.image.load("BG2.png")
 # -- Manages how fast screen refreshes 
 clock = pygame.time.Clock()
 
@@ -149,6 +151,8 @@ for x in range (number_of_enemies):
 player = Player(YELLOW, 10, 10,1)
 all_sprites_group.add (player)
 
+ 
+
 while not done: 
  # -- User input and controls
 
@@ -173,6 +177,7 @@ while not done:
             player.vel_x = 0
 
 #End If
+ screen.blit(bg,(0,0))
  #Next event
 
  # -- Game logic goes after this comment
@@ -183,8 +188,7 @@ while not done:
     player.lives = player.lives - 1
     print (player.lives)
 
-  # -- Draw here 
- screen.fill (BLACK) 
+  
  all_sprites_group.draw (screen) 
  screen.blit(player.text1, player.textRect1)
  # -- flip display to reveal new position of objects 
