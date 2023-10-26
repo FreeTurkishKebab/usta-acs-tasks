@@ -1,6 +1,8 @@
 import pygame 
 import random 
 import math 
+import sys
+from pygame.locals import *
 # -- Global Constants 
 x = 0 
 y = 0 
@@ -28,7 +30,15 @@ all_sprites_group = pygame.sprite.Group()
 bg = pygame.image.load("BG2.png")
 # -- Manages how fast screen refreshes 
 clock = pygame.time.Clock()
-
+#cadd variable incase of collision with lava 
+collision_tolerance = 10
+#add platform spawn time 
+spawnTime = 1000
+#make the lava and spawn island
+lava = Rect(-300, 460, 1000, 20)
+lavaTexture = pygame.image.load("LVT.jpg")
+island = Rect(400, 350, 100, 100)
+#make a variable for current state of jump 
 
 
 ## -- Define the class snow which is a sprite 
@@ -52,6 +62,7 @@ class Platform(pygame.sprite.Sprite):
    self.rect.x = random.randrange(-1,2) + self.rect.x
    self.rect.y = self.rect.y + self.speed
 #-------------------------------------------------------------------------
+
 class Player(pygame.sprite.Sprite): 
  # Define the constructor for snow 
     def __init__(self, color, width, height, speed): 
@@ -70,7 +81,8 @@ class Player(pygame.sprite.Sprite):
         self.vel_x = 0
         self.vel_y = 10
 
-        self.lives = 1
+        self.lives = 3
+        self.score = 0
 
         self.m = 1 
 
@@ -86,18 +98,26 @@ class Player(pygame.sprite.Sprite):
             # setting original values to v and m
             self.vel_y = 10
             self.m = 1
-        
+
         self.rect.x -= self.vel_x
+        if self.vel_y == -1:
+           self.rect.y -= self.vel_y
         # end if
         msg = "Lives: " + str(self.lives)
         self.font1 = pygame.font.SysFont('freesanbold.ttf', 24)
         self.text1 = self.font1.render(msg , True, WHITE)
         self.textRect1 = self.text1.get_rect()
 
+        score = "Score: " + str(self.score)
+        self.font2 = pygame.font.SysFont('freesanbold.ttf', 24)
+        self.text2 = self.font1.render(score , True, WHITE)
+        self.textRect2 = self.text1.get_rect()
+
         if self.is_jump:
             self.jump()
-    
+
     def jump(self):
+
         # calculate force (F). F = 1 / 2 * mass * velocity ^ 2.
         F = 0.5 * self.m * self.vel_y ** 2
 
@@ -110,6 +130,8 @@ class Player(pygame.sprite.Sprite):
         if self.vel_y < 0:
             # negative sign is added to counter negative velocity
             self.m = -1
+
+        
 
 
 class bullet(pygame.sprite.Sprite):
@@ -150,7 +172,6 @@ for x in range (number_of_Platforms):
 player = Player(YELLOW, 10, 10,1)
 all_sprites_group.add (player)
 
- 
 
 while not done: 
  # -- User input and controls
@@ -167,7 +188,9 @@ while not done:
             player.vel_x = 3
         
         elif event.key == pygame.K_SPACE:
+            player.vel_y = 10
             player.is_jump = True
+
 
     if event.type == pygame.KEYUP:
         if event.key == pygame.K_RIGHT:
@@ -175,17 +198,31 @@ while not done:
         if event.key == pygame.K_LEFT:
             player.vel_x = 0
 
+ hit = pygame.sprite.spritecollide(player, Platform_group, False) 
+ if player.is_jump and player.m == -1 and hit:
+    player.vel_y = -1
+    player.is_jump = False 
+    
+    
+
 #End If
  screen.blit(bg,(0,0))
  #Next event
 
  # -- Game logic goes after this comment
  all_sprites_group.update()
- # -- when Platform hits the player add 5 to score. 
- player_hit_group = pygame.sprite.spritecollide(player, Platform_group, True)
- for foo in player_hit_group: 
-    player.lives = player.lives - 1
-    print (player.lives)
+  
+    
+    
+    
+
+ #draw the lava and island 
+ screen.blit(lavaTexture, (lava))
+ pygame.draw.rect(screen, (17, 144, 163), island)
+
+ #game over means touching lava 
+ 
+
 
   
  all_sprites_group.draw (screen) 

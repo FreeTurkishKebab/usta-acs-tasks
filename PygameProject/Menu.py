@@ -2,6 +2,7 @@ import pygame
 import sys 
 from pygame.locals import *
 from pygame import mixer
+
 #make a background music 
 mixer.init()
 mixer.music.load('MenuM.mp3')
