@@ -3,18 +3,20 @@ import random
 import math 
 import sys
 from pygame.locals import *
+# -- Initialise PyGame
+pygame.init() 
 # -- Global Constants 
 x = 0 
 y = 0 
 loop = 0
-
+points = 0
+platforms = []
+rand = 0
 # -- Colours 
 BLACK = (0,0,0) 
 WHITE = (255,255,255) 
 BLUE = (50,50,255) 
 YELLOW = (255,255,0) 
-# -- Initialise PyGame
-pygame.init() 
 # -- Blank Screen
 size = (640,480) 
 screen = pygame.display.set_mode(size) 
@@ -30,37 +32,43 @@ all_sprites_group = pygame.sprite.Group()
 bg = pygame.image.load("BG2.png")
 # -- Manages how fast screen refreshes 
 clock = pygame.time.Clock()
+points_inc = pygame.USEREVENT+1
+pygame.time.set_timer(points_inc, 1000)
+font = pygame.font.Font(None, 26)
 #cadd variable incase of collision with lava 
 collision_tolerance = 10
 #add platform spawn time 
 spawnTime = 1000
 #make the lava and spawn island
-lava = Rect(-300, 460, 1000, 20)
+lava = Rect(-275, 450, 800, 50)
 lavaTexture = pygame.image.load("LVT.jpg")
 island = Rect(400, 350, 100, 100)
+overlay = pygame.image.load("Platform.png")
 #make a variable for current state of jump 
 
 
 ## -- Define the class snow which is a sprite 
 class Platform(pygame.sprite.Sprite): 
  # Define the constructor for snow 
- def __init__(self, color, width, height,speed): 
+ def __init__(self): 
  # Call the sprite constructor 
    super().__init__() 
  # Create a sprite and fill it with colour 
-   self.image = pygame.image.load('Platform.png').convert_alpha()
+   self.image = pygame.Surface((100,10))
+   self.image.fill((0,255,0))
     # Set the position of the sprite 
    self.rect = self.image.get_rect() 
-   self.rect.x = random.randrange(0, 600) 
-   self.rect.y = random.randrange(-50, 0)
-   self.speed = 1
+   self.rect.x = random.randint(0, 480 - self.rect.width)
+   self.rect.y = 0
 
- def update(self):
-   if self.rect.y >= 480:
-    self.rect.y = 0
-    self.rect.x = random.randrange(0, 600)
-   self.rect.x = random.randrange(-1,2) + self.rect.x
-   self.rect.y = self.rect.y + self.speed
+def add_platform():
+    rand = random.randint(1, 3)
+    while rand != 0:
+        platform = Platform()
+        platforms.append(platform)
+        rand -= 1
+    #endwhile
+   
 #-------------------------------------------------------------------------
 
 class Player(pygame.sprite.Sprite): 
@@ -75,8 +83,8 @@ class Player(pygame.sprite.Sprite):
         
         # Set the position of the sprite 
         self.rect = self.image.get_rect() 
-        self.rect.x = 300 
-        self.rect.y =  size[0] - height
+        self.rect.x = 450
+        self.rect.y =  340
         
         self.vel_x = 0
         self.vel_y = 10
@@ -110,8 +118,8 @@ class Player(pygame.sprite.Sprite):
 
         score = "Score: " + str(self.score)
         self.font2 = pygame.font.SysFont('freesanbold.ttf', 24)
-        self.text2 = self.font1.render(score , True, WHITE)
-        self.textRect2 = self.text1.get_rect()
+        self.text2 = self.font2.render(score , True, WHITE)
+        self.textRect2 = self.text2.get_rect()
 
         if self.is_jump:
             self.jump()
@@ -157,13 +165,6 @@ bulletlist = pygame.sprite.Group()
    # -- User inputs here 
  #End Procedure
 #End Class
-
-# Create the platforms
-number_of_Platforms = 10 # we are creating 10 Platforms
-for x in range (number_of_Platforms): 
-  Platforms = Platform(BLUE, 10, 10,1) # Platforms are blue with size 10 by 10 px
-  Platform_group.add (Platforms) # adds the new Platform to the group of Platforms
-  all_sprites_group.add (Platforms) # adds it to the group of all Sprites
  
 #Next x
 
@@ -172,6 +173,8 @@ for x in range (number_of_Platforms):
 player = Player(YELLOW, 10, 10,1)
 all_sprites_group.add (player)
 
+#make sure the platforms will fall in increments 
+fall_plat = pygame.time.get_ticks() + 5000
 
 while not done: 
  # -- User input and controls
@@ -179,6 +182,20 @@ while not done:
  for event in pygame.event.get():
     if event.type == pygame.QUIT:
         done = True
+    
+    if event.type == points_inc:
+        points += 1
+
+    time_now = pygame.time.get_ticks()
+
+    if time_now >= fall_plat:
+       add_platform()
+       fall_plat= time_now + 5000
+    
+    for platform in platforms:
+       platform.rect.y += 5
+       if platform.rect.y > 640:
+          platforms.remove(platform)
 
     if event.type == pygame.KEYDOWN:
         if event.key == pygame.K_RIGHT:
@@ -202,11 +219,22 @@ while not done:
  if player.is_jump and player.m == -1 and hit:
     player.vel_y = -1
     player.is_jump = False 
+
+ for platform in platforms:
+    screen.blit(overlay, platform.rect)
+ pygame.display.flip()
+ 
+ if player.rect.colliderect(lava):
+    pygame.time.set_timer(points_inc, 0)
+
+
+ text = font.render(f'Score: {points}', True, (255, 255, 255))
     
     
 
 #End If
  screen.blit(bg,(0,0))
+ screen.blit(text, (0, 15))
  #Next event
 
  # -- Game logic goes after this comment
@@ -217,7 +245,8 @@ while not done:
     
 
  #draw the lava and island 
- screen.blit(lavaTexture, (lava))
+ pygame.draw.rect(screen, (247, 104, 6), lava)
+ screen.blit(lavaTexture, (-275, 450))
  pygame.draw.rect(screen, (17, 144, 163), island)
 
  #game over means touching lava 
