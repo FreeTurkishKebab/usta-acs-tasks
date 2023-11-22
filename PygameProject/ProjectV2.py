@@ -1,11 +1,12 @@
+#-------All imports here --------
 import pygame 
 import random 
 import math 
 import sys
 from pygame.locals import *
-# -- Initialise PyGame
+#Initialise PyGame
 pygame.init() 
-# -- Global Constants 
+# -------- Global Constants ---------
 x = 0 
 y = 0 
 loop = 0
@@ -17,14 +18,14 @@ BLACK = (0,0,0)
 WHITE = (255,255,255) 
 BLUE = (50,50,255) 
 YELLOW = (255,255,0) 
-# -- Blank Screen
+# --------- Making the screen with images defined --------
 size = (640,480) 
 screen = pygame.display.set_mode(size) 
-# -- Title of new window/screen 
-dt = pygame.display.set_caption("Space") 
-# -- Exit game flag set to false 
+#Title of new window/screen 
+dt = pygame.display.set_caption("Jump-Jump-Mania") 
+#Exit game flag set to false 
 done = False
-# Create a list of the snow blocks 
+# Create a list of the platforms
 Platform_group = pygame.sprite.Group() 
 # Create a list of all sprites 
 all_sprites_group = pygame.sprite.Group()  
@@ -44,7 +45,7 @@ lava = Rect(-275, 450, 800, 50)
 lavaTexture = pygame.image.load("LVT.jpg")
 island = Rect(400, 350, 100, 100)
 overlay = pygame.image.load("Platform.png")
-#make a variable for current state of jump 
+#----------------------------------------------------
 
 
 ## -- Define the class snow which is a sprite 
@@ -54,8 +55,7 @@ class Platform(pygame.sprite.Sprite):
  # Call the sprite constructor 
    super().__init__() 
  # Create a sprite and fill it with colour 
-   self.image = pygame.Surface((100,10))
-   self.image.fill((0,255,0))
+   self.image =  pygame.image.load('Platform.png').convert_alpha()
     # Set the position of the sprite 
    self.rect = self.image.get_rect() 
    self.rect.x = random.randint(0, 480 - self.rect.width)
@@ -223,9 +223,11 @@ while not done:
  for platform in platforms:
     screen.blit(overlay, platform.rect)
  pygame.display.flip()
- 
+
  if player.rect.colliderect(lava):
     pygame.time.set_timer(points_inc, 0)
+    if player.lives > 0:
+        player.lives -= player.lives
 
 
  text = font.render(f'Score: {points}', True, (255, 255, 255))
