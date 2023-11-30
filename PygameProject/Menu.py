@@ -4,9 +4,9 @@ from pygame.locals import *
 from pygame import mixer
 
 #make a background music 
-#mixer.init()
-#mixer.music.load('MenuM.mp3')
-#mixer.music.play()
+mixer.init()
+mixer.music.load('MenuM.mp3')
+mixer.music.play()
 
 pygame.init()
 

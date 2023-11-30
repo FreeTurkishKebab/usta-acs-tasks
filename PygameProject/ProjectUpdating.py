@@ -39,13 +39,14 @@ PLAYER_HEIGHT = 15
 IS_JUMPING = False
 JUMP_HEIGHT = 15
 JUMP_COUNT = 10
-GRAVITY = 1
+direction = 1
+GRAVITY = 9
 points = 0
 collisionI = False
-FALLING = False
 wait = False
 onIsland = False
 OnPlat = False
+Time = 1500
 #----------Making the screen with other aspects------------
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Jump Jump Mania")
@@ -87,7 +88,7 @@ def add_platform():
         rand -= 1
     #endwhile
     
-fall_plat = pygame.time.get_ticks() + 1500 
+fall_plat = pygame.time.get_ticks() + Time 
 SpeedV = pygame.time.get_ticks() + 3000
 FallSpeed = 1
 jump_delay = pygame.time.get_ticks() + 500
@@ -105,22 +106,17 @@ def update(self):
     self.font2 = pygame.font.SysFont('freesanbold.ttf', 24)
     self.text2 = self.font2.render(score , True, WHITE)
     self.textRect2 = self.text2.get_rect()
-#------------Define the jump delay----------------
 
-#def delay(wait):
-    #jump_delay = CURRENT_TIME + 1000
-    #wait = True
-   # if CURRENT_TIME >= jump_delay:
-     #   wait = False 
 #-------------------Bullet class------------------
 class Bullet(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image=pygame.Surface((100,10))
+        self.image=pygame.Surface((10,15))
         self.image.fill((0,255,0))
         self.rect = self.image.get_rect()
-        self.rect.x = random.randint(100, 640 - self.rect.width)
-        self.rect.y = 0
+        self.rand = random.randint(0, 1)
+        self.rect.x = self.rand * WIDTH
+        self.rect.y = random.randint(0, HEIGHT)
 
 #--------maingame loop redifined here-----
 
@@ -137,7 +133,7 @@ while True:
     #The time which each 1-3 platform is put onto the screen
     if CURRENT_TIME >= fall_plat:
         add_platform()
-        fall_plat = CURRENT_TIME + 1500
+        fall_plat = CURRENT_TIME + Time
     
     #Platform speed up over time 
     if CURRENT_TIME >= SpeedV:
@@ -146,7 +142,9 @@ while True:
 
     #set gravity to platform fall speed 
     if FallSpeed >= GRAVITY:  
-        GRAVITY = FallSpeed + 1
+        GRAVITY = FallSpeed + 3
+        if Time >= 500:
+            Time = Time - 300
     #endif 
 
 
@@ -176,31 +174,32 @@ while True:
 
     if IS_JUMPING:
         if JUMP_COUNT >= 0:
-            neg = 1
             FALLING = False
+            direction = -1
 
-            if JUMP_COUNT < 0:
-                neg = -1
-                
-            
-            PLAYER_Y -= (JUMP_COUNT ** 2) * 0.5 * neg
+
+            PLAYER_Y -= (JUMP_COUNT ** 2) * 0.5 * -(direction)
             JUMP_COUNT -= 1
 
+            if PLAYER_Y == 0:
+                JUMP_COUNT = 0
+        
         else:
             IS_JUMPING = False
-            JUMP_COUNT = 10
-            FALLING = True
+            direction = 1
 
         
     #---------Gravity function--------
-    if FALLING and not onIsland and not OnPlat:
+    if not OnPlat:
         if PLAYER_Y < HEIGHT - PLAYER_SIZE:
-            PLAYER_Y += 3
+            PLAYER_Y += GRAVITY * direction
+
         else:
             PLAYER_Y = HEIGHT - PLAYER_SIZE 
+
     if OnPlat:
         if PLAYER_Y < HEIGHT - PLAYER_SIZE:
-            PLAYER_Y += 1
+            PLAYER_Y += FallSpeed
     
     #Player position and lava collision 
     PLAYER_RECT = pygame.Rect(PLAYER_X, PLAYER_Y, PLAYER_WIDTH, PLAYER_HEIGHT)
@@ -211,16 +210,20 @@ while True:
 
     #landing on platforms
     for platform in platforms:
-        if PLAYER_RECT.colliderect(platform.rect):
-            IS_JUMPING = False
-            JUMP_COUNT = 10
+        if PLAYER_RECT.colliderect(platform.rect) and (direction == 1):
             OnPlat = True
-            FALLING = False
+
         else:
             OnPlat = False
+
+
+        if OnPlat:
+            PLAYER_Y = platform.rect.top
+            IS_JUMPING = False
+            JUMP_COUNT = 10
+
     
-    if not OnPlat and not IS_JUMPING and not onIsland:
-        FALLING = True
+    
     
     # -----------Sprites appearing on screen-------
     SCREEN.fill(BLACK)
@@ -232,7 +235,7 @@ while True:
     #-------Make and island and make it dissapear after some time----------
     if CURRENT_TIME - START_TIME < DURATION:
         pygame.draw.rect(SCREEN, (17,144,163), island)
-        if PLAYER_RECT.bottom >= (island.top -3) and PLAYER_RECT.colliderect(island) and FALLING:
+        if PLAYER_RECT.bottom >= (island.top -3) and PLAYER_RECT.colliderect(island) and (direction == 1):
             collisionI = True
         else:
             collisionI = False
