@@ -42,8 +42,8 @@ JUMP_COUNT = 10
 direction = 1
 GRAVITY = 9
 points = 0
+lives = 3
 collisionI = False
-wait = False
 onIsland = False
 OnPlat = False
 Time = 1500
@@ -66,7 +66,9 @@ PLAYER_Y = ISLAND_Y - 25
 
 #add on to platforms 
 overlayPlatform = pygame.image.load("Platform.png")
-
+overlayBulletR = pygame.image.load("BulletRight.png")
+overlayBulletL = pygame.image.load("BulletLeft.png")
+overlayCoin = pygame.image.load("GCoin.png")
 #add on the lava 
 lavaTexture = pygame.image.load("LVT.jpg")
 lava = Rect(-20, 460 , 800, 20)
@@ -92,7 +94,6 @@ fall_plat = pygame.time.get_ticks() + Time
 SpeedV = pygame.time.get_ticks() + 3000
 FallSpeed = 1
 jump_delay = pygame.time.get_ticks() + 500
-delay = False
 #------------------Points and lives function-------------------
 def update(self):
     #Lives
@@ -108,15 +109,38 @@ def update(self):
     self.textRect2 = self.text2.get_rect()
 
 #-------------------Bullet class------------------
-class Bullet(pygame.sprite.Sprite):
+bullets = []
+class MakeBullet(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image=pygame.Surface((10,15))
-        self.image.fill((0,255,0))
+        self.image = pygame.Surface((15,10))
+        self.image.fill((34,134,234)) 
+        self.rand = random.randint(0,1)
         self.rect = self.image.get_rect()
-        self.rand = random.randint(0, 1)
         self.rect.x = self.rand * WIDTH
         self.rect.y = random.randint(0, HEIGHT)
+
+def add_bullet():
+    bullet = MakeBullet()
+    bullets.append(bullet)
+bulletappear = pygame.time.get_ticks() + 3000
+
+#----------------Gold coin class-----------------
+coins = []
+class GoldCoin(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.Surface((12,12))
+        self.image.fill((255,215,0)) 
+        self.rand = random.randint(0,1)
+        self.rect = self.image.get_rect()
+        self.rect.x = self.rand * WIDTH
+        self.rect.y = random.randint(0, HEIGHT)
+
+def add_coin():
+    coin = GoldCoin()
+    coins.append(coin)
+coinappear = pygame.time.get_ticks() + 5000
 
 #--------maingame loop redifined here-----
 
@@ -135,6 +159,17 @@ while True:
         add_platform()
         fall_plat = CURRENT_TIME + Time
     
+    #Gold coins come out of the wall every 5 seconds 
+    if CURRENT_TIME >= coinappear:
+        add_coin()
+        coinappear = CURRENT_TIME + 5000
+    
+    #Bullets come out of the walls every 3 seconds
+    if CURRENT_TIME >= bulletappear:
+        add_bullet()
+        bulletappear = CURRENT_TIME + 3000
+        
+    
     #Platform speed up over time 
     if CURRENT_TIME >= SpeedV:
         FallSpeed += 0.05
@@ -144,7 +179,7 @@ while True:
     if FallSpeed >= GRAVITY:  
         GRAVITY = FallSpeed + 3
         if Time >= 500:
-            Time = Time - 300
+            Time = Time - 500
     #endif 
 
 
@@ -154,6 +189,31 @@ while True:
         #remove platform once it reaches the end 
         if platform.rect.y > 480:
             platforms.remove(platform)
+    
+    #speed of the gold coins being set 
+    for coin in coins:
+        if coin.rand == 0:
+            coin.rect.x += 3
+            if coin.rect.x > WIDTH:
+                coins.remove(coin)
+        
+        elif coin.rand == 1:
+            coin.rect.x -= 3
+            if coin.rect.y < 0:
+                 coins.remove(coin)
+
+    #speed of the bullets being set
+    for bullet in bullets:
+        if bullet.rand == 0:
+            bullet.rect.x += 3
+            if bullet.rect.x > WIDTH:
+                bullets.remove(bullet)
+        
+        elif bullet.rand == 1:
+            bullet.rect.x -= 3
+            if bullet.rect.y < 0:
+                bullets.remove(bullet)
+
 
     #-------variables to be updated--------
 
@@ -222,6 +282,19 @@ while True:
             IS_JUMPING = False
             JUMP_COUNT = 10
 
+    #------Make the player collide with the gold coins 
+    for coin in coins:
+        if PLAYER_RECT.colliderect(coin.rect):
+            points += 10
+            coins.remove(coin)
+    
+    #------Make the player collide with the bullets 
+    for bullet in bullets:
+        if PLAYER_RECT.colliderect(bullet.rect):
+            lives -= 1
+            bullets.remove(bullet)
+
+
     
     
     
@@ -257,11 +330,26 @@ while True:
     
     #----------Display points and lives-----------
     text = font.render(f'Points: {points}', True, (255, 255, 255))
-    SCREEN.blit(text, (0,15))
+    SCREEN.blit(text, (0,4))
+
+    text2 = font.render(f'Lives: {lives}', True, (255,255,255))
+    SCREEN.blit(text2, (0,24))
 
     #----make the platforms on the screen
     for platform in platforms:
         SCREEN.blit(overlayPlatform, platform.rect)
+    
+    #-----Make the gold coins appear on the screen
+    for coin in coins:
+        SCREEN.blit(overlayCoin, coin.rect)
+    
+    #-----Make the bullets appear on the screen
+    for bullet in bullets:
+        if bullet.rand == 1:
+            SCREEN.blit(overlayBulletL, bullet.rect)
+        elif bullet.rand == 0:
+            SCREEN.blit(overlayBulletR, bullet.rect)
+
     
 
 

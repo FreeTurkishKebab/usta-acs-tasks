@@ -39,6 +39,7 @@ PLAYER_HEIGHT = 15
 IS_JUMPING = False
 JUMP_HEIGHT = 15
 JUMP_COUNT = 10
+direction = 1
 GRAVITY = 1
 points = 0
 collisionI = False
@@ -178,6 +179,7 @@ while True:
         if JUMP_COUNT >= 0:
             neg = 1
             FALLING = False
+            direction = -1
 
             if JUMP_COUNT < 0:
                 neg = -1
@@ -195,7 +197,7 @@ while True:
     #---------Gravity function--------
     if FALLING and not onIsland and not OnPlat:
         if PLAYER_Y < HEIGHT - PLAYER_SIZE:
-            PLAYER_Y += 3
+            PLAYER_Y += (3 * direction)
         else:
             PLAYER_Y = HEIGHT - PLAYER_SIZE 
     if OnPlat:
