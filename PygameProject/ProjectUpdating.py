@@ -4,6 +4,8 @@ import random
 import math 
 import sys
 from pygame.locals import *
+import pygame.freetype
+
 #Initialise PyGame
 pygame.init() 
 
@@ -20,6 +22,7 @@ BLACK = (0,0,0)
 WHITE = (255,255,255) 
 BLUE = (50,50,255) 
 YELLOW = (255,255,0)
+RED = (255,0,0)
 
 #Times
 START_TIME = pygame.time.get_ticks()
@@ -47,6 +50,7 @@ collisionI = False
 onIsland = False
 OnPlat = False
 Time = 1500
+over = False
 #----------Making the screen with other aspects------------
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Jump Jump Mania")
@@ -125,6 +129,7 @@ def add_bullet():
     bullets.append(bullet)
 bulletappear = pygame.time.get_ticks() + 3000
 
+
 #----------------Gold coin class-----------------
 coins = []
 class GoldCoin(pygame.sprite.Sprite):
@@ -144,13 +149,18 @@ coinappear = pygame.time.get_ticks() + 5000
 
 #--------maingame loop redifined here-----
 
-while True:
+while True and not over:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
         elif event.type == points_inc:
             points += 1
+
+    #---------Making the game over screen---------
+    if lives <= 0:
+        over = True
+        
     #---------falling platforms------
     CURRENT_TIME = pygame.time.get_ticks()
     
@@ -215,10 +225,6 @@ while True:
                 bullets.remove(bullet)
 
 
-    #-------variables to be updated--------
-
-
-
     #----- kEYBOARD CONTROLS --------
     KEYS = pygame.key.get_pressed()
 
@@ -266,6 +272,7 @@ while True:
 
     if PLAYER_RECT.colliderect(lava):
         pygame.time.set_timer(points_inc, 0)
+        lives -= lives
         # GAME OVER
 
     #landing on platforms
@@ -354,5 +361,126 @@ while True:
 
 
     pygame.display.flip()
+
+    pygame.time.Clock().tick(120)
+
+#-------------------------Text file is created---------------------
+
+current_score = points 
+high_score = 0 
+
+if current_score > high_score:  #set the values for the new bigh score 
+    high_score = current_score
+
+with open("high_score.txt", "a") as file:
+    file.write(str(high_score))
+#-------------Game over screen is drawn---------------------------------------------------------------
+
+#-----------------Create the dimensions for the buttons---------------
+
+BUTTON_WIDTH = 200
+BUTTON_HEIGHT = 50
+BUTTON_TEXT_COLOR = (0, 0, 0)
+BFONT = pygame.font.Font('freesansbold.ttf', 36)
+#--------------Add the variables for the textures in the game over screen-------
+
+#save an image to add to the buttons  and background
+wood_texture = pygame.image.load("wood_texture.png")
+background_image = pygame.image.load("GameOver.png")
+
+#--------------Create a class for the buttons--------------
+
+class Button:
+    #This is the initial definition of the button
+    def __init__(self, x, y, width, height, text, action):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = text 
+        self.action = action 
+    
+    #This is where the dimensions and texture of the buttons are declared 
+    def draw(self, SCREEN):
+        SCREEN.blit(wood_texture, self.rect)
+        pygame.draw.rect(SCREEN, (0, 0, 0), self.rect, 2) #wooden border 
+        text_surface = BFONT.render(self.text, True, BUTTON_TEXT_COLOR)
+        text_rect = text_surface.get_rect(center = self.rect.center)
+        SCREEN.blit(text_surface, text_rect)
+
+    #This checks whether the mouse is clicking on the button or not
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self.rect.collidepoint(event.pos):
+                self.action()
+
+#Define the different texts  
+              
+def text_to_screen(SCREEN, text, x, y): 
+    text = str(text)
+    Tfont = pygame.font.Font(None, 100)
+    text = Tfont.render(text, True, RED)
+    SCREEN.blit(text, (x, y))
+
+#Score
+FinalScore = "Score: " + str(points)
+
+def display_score(SCREEN, x, y): 
+    text2 = FinalScore
+    Tfont = pygame.font.Font(None, 70)
+    text2 = Tfont.render(text2, True, RED)
+    SCREEN.blit(text2, (x, y))
+    
+def display_inpMessage(SCREEN, x, y): 
+    text3 = "Please input a name: "
+    Tfont = pygame.font.Font(None, 40)
+    text3 = Tfont.render(text3, True, RED)
+    SCREEN.blit(text3, (x, y))
+
+User = ""   
+#---------------Define the different button types-----------------------
+
+def Menu():
+    import Menu
+    open(file="Menu")
+
+#--------------Draw the buttons------------------
+
+Menu_Button = Button(
+    WIDTH // 2 - BUTTON_WIDTH // 2, 
+    HEIGHT // 2 - BUTTON_HEIGHT // 2 + 150, 
+    BUTTON_WIDTH,
+    BUTTON_HEIGHT, 
+    "Quit" ,
+    Menu
+)
+
+buttons = [Menu_Button]
+#-------------Main loop for the game over screen----------
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        for button in buttons:
+            button.handle_event(event)
+
+    SCREEN.blit(background_image, (0, 0)) #draw the background image
+
+    #-----------------draw the different texts on screen-----------------
+
+    text_to_screen(SCREEN, 'GAME OVER', WIDTH // 2 - 200, HEIGHT // 2 - 200) #The game over text
+
+    display_score(SCREEN, WIDTH // 2 - 100, HEIGHT // 2 - 100) #The score text
+    
+    display_inpMessage(SCREEN, WIDTH // 2 - 300, HEIGHT // 2 )
+
+    
+    for button in buttons:
+        button.draw(SCREEN)
+    
+    pygame.display.flip()
+    
+    
+
+    
 
     pygame.time.Clock().tick(120)

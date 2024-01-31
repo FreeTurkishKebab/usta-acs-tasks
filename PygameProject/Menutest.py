@@ -1,6 +1,8 @@
 import pygame
+from pygame.locals import *
 
 pygame.init()
+
 
 width = 640
 height = 480
